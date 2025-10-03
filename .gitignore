@@ -1,0 +1,36 @@
+# ----- Global OS -----
+.DS_Store
+Thumbs.db
+
+# ----- IntelliJ (root and modules) -----
+/.idea/
+*.iml
+
+# ===== Backend (Java/Spring/Gradle) =====
+backend/build/
+backend/out/
+backend/.gradle/
+backend/target/
+backend/bin/
+backend/*.log
+
+# Spring Boot secrets (keep real files out of Git)
+backend/src/main/resources/application*.properties
+backend/src/main/resources/*.yml
+
+# Commit a safe example instead:
+# backend/src/main/resources/application.example.properties
+
+# ===== Frontend (Node/React/Vite) =====
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+frontend/*.log
+frontend/npm-debug.log*
+frontend/yarn-*.log*
+frontend/pnpm-lock.yaml
+frontend/package-lock.json
+
+# Env files (commit an example instead)
+frontend/.env
+frontend/.env.*.local

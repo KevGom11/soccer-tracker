@@ -1,0 +1,20 @@
+### 1) Create (idempotent)
+POST http://localhost:8080/api/subscriptions
+Content-Type: application/json
+
+{
+  "email": "kevgom11@gmail.com",
+  "teamId": 2
+}
+
+### 2) Create same again (should still be 200)
+POST http://localhost:8080/api/subscriptions
+Content-Type: application/json
+
+{
+  "email": "kevgom11@gmail.com",
+  "teamId": 2
+}
+
+### 3) List
+GET http://localhost:8080/api/subscriptions?email=kevgom11@gmail.com
