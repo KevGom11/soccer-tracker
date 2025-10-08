@@ -1,0 +1,79 @@
+server:
+  port: 8080
+
+spring:
+  profiles:
+    active: dev
+  config:
+    activate:
+      on-profile: dev
+  datasource:
+    url: jdbc:postgresql://localhost:5432/soccertracker
+    driver-class-name: org.postgresql.Driver
+    username: soccer
+    password: soccer
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc.time_zone: UTC
+        hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    default-schema: public       # <- important if your DB user’s default schema isn’t public
+    create-schemas: true
+    baseline-on-migrate: true
+  jackson:
+    time-zone: UTC
+  cache:
+    type: caffeine
+  main:
+    allow-bean-definition-overriding: true
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: kevgom11@gmail.com
+    password: ${EMAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+# External API config for football-data.org
+footballdata:
+  baseUrl: https://api.football-data.org/v4
+  token: ${FOOTBALL_DATA_API_KEY:}
+  maxWindowDays: 10
+  statusesUpcoming: SCHEDULED,TIMED
+  statusesActive: SCHEDULED,TIMED,IN_PLAY,PAUSED
+  defaultCompetitions: PL,PD,SA,BL1,FL1,CL,ELC,BSA,MLI,MLS,CLI,WC
+
+soccer:
+  api:
+    baseUrl: https://api.football-data.org/v4
+    token: ${FOOTBALL_DATA_API_KEY:}
+
+app:
+  security:
+
+  mail:
+    from: kevgom11@gmail.com
+  reminders:
+    enabled: true
+    hoursBeforeKickoff: 3
+fetcher:
+  enabled: true
+  # Run every minute
+  cron: "0 * * * * *"
+  windowDays: 2
+  includeActive: true
+
+  # Rate limiting / pacing
+  maxTeamsPerRun: 9               # < 10/min limit
+  spacingMillisBetweenCalls: 6500 # ~6.5s between API calls ≈ 9/min with safety margin
+  minIntervalSeconds: 1800        # don't refetch the SAME team more than once every 30 min

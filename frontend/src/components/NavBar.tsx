@@ -6,14 +6,16 @@ export default function NavBar() {
   const inactive = "text-gray-600 hover:bg-gray-100 hover:text-gray-900";
 
   return (
-    <header className="border-b bg-white sticky top-0 z-10">
-      <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
-        <Link to="/" className="text-lg font-semibold text-emerald-600">Soccer Tracker</Link>
-        <nav className="flex items-center gap-1">
-          <NavLink to="/matches" className={({isActive}) => `${linkBase} ${isActive ? active : inactive}`}>Matches</NavLink>
-          <NavLink to="/users" className={({isActive}) => `${linkBase} ${isActive ? active : inactive}`}>Users</NavLink>
-        </nav>
-      </div>
-    </header>
+      <header className="border-b bg-white sticky top-0 z-10">
+        <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
+          <Link to="/" className="text-lg font-semibold text-emerald-600">Soccer Tracker</Link>
+          <nav className="flex items-center gap-1">
+            <NavLink to="/" end className={({isActive}) => `${linkBase} ${isActive ? active : inactive}`}>Home</NavLink>
+            <NavLink to="/matches" className={({isActive}) => `${linkBase} ${isActive ? active : inactive}`}>Matches</NavLink>
+            <NavLink to="/users" className={({isActive}) => `${linkBase} ${isActive ? active : inactive}`}>Users</NavLink>
+          </nav>
+        </div>
+      </header>
   );
 }
+
