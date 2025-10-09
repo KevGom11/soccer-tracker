@@ -1,63 +1,60 @@
 package com.kevin.soccertracker.service;
 
-import com.kevin.soccertracker.domain.Match;
-import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.lang.Nullable;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
-import java.time.ZonedDateTime;
-import java.util.List;
-
+/**
+ * Minimal email utility.
+ * - If JavaMailSender is available, sends real emails.
+ * - Otherwise, logs messages so OTP/test flows work in dev without SMTP.
+ */
 @Service
-@RequiredArgsConstructor
 public class EmailService {
 
-    private final JavaMailSender mailSender;
+    private static final Logger log = LoggerFactory.getLogger(EmailService.class);
 
-    @Value("${app.mail.from:no-reply@example.com}")
-    private String from;
+    /** Injected only if an SMTP sender is configured (spring-boot-starter-mail). */
+    @Autowired(required = false)
+    @Nullable
+    private JavaMailSender mailSender;
 
-    /**
-     * Existing reminder email functionality.
-     */
-    public void sendReminder(String email, List<Match> matches) {
-        SimpleMailMessage msg = new SimpleMailMessage();
-        msg.setFrom(from);
-        msg.setTo(email);
-        msg.setSubject("Upcoming matches reminder");
+    /** From address for real sends (fallback is dev-safe). */
+    @Value("${mail.from:no-reply@soccertracker.local}")
+    private String fromAddress;
 
-        StringBuilder body = new StringBuilder("You have upcoming matches:\n\n");
-        for (Match m : matches) {
-            body.append("%s vs %s at %s%n".formatted(
-                    m.getHomeTeam().getName(),
-                    m.getAwayTeam().getName(),
-                    m.getUtcDate()
-            ));
+    /** Core plain-text send used by AuthService and others. */
+    public void send(String to, String subject, String body) {
+        if (mailSender == null) {
+            log.info("MAIL (DEV LOG) -> to='{}' subject='{}' body='{}'", to, subject, body);
+            return;
         }
-
-        msg.setText(body.toString());
+        SimpleMailMessage msg = new SimpleMailMessage();
+        msg.setFrom(fromAddress);
+        msg.setTo(to);
+        msg.setSubject(subject);
+        msg.setText(body);
         mailSender.send(msg);
+        log.debug("MAIL (SENT) -> to='{}' subject='{}'", to, subject);
     }
 
-    /**
-     * New: Simple sanity-test email so we can verify SMTP end-to-end.
-     */
+    /** Convenience alias some code may already use. */
+    public void sendPlainText(String to, String subject, String body) {
+        send(to, subject, body);
+    }
+
+    /** Another alias for generic notifications. */
+    public void notifyUser(String to, String subject, String body) {
+        send(to, subject, body);
+    }
+
+    /** ✅ Added for AdminController: sends a simple test email (or logs in dev). */
     public void sendTest(String to) {
-        SimpleMailMessage msg = new SimpleMailMessage();
-        msg.setFrom(from);
-        msg.setTo(to);
-        msg.setSubject("SoccerTracker SMTP Test");
-        msg.setText("""
-                Hello!
-
-                This is a test email from SoccerTracker to confirm your SMTP configuration.
-                If you received this, outgoing mail is working.
-
-                Timestamp: %s
-                """.formatted(ZonedDateTime.now()));
-
-        mailSender.send(msg);
+        send(to, "SoccerTracker Test Email", "This is a test email from SoccerTracker.");
     }
 }

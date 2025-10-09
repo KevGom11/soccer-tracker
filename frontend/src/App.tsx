@@ -1,8 +1,16 @@
-﻿import { Route, Routes } from "react-router-dom";
+﻿import { Navigate, Route, Routes } from "react-router-dom";
 import NavBar from "@/components/NavBar";
 import Matches from "@/pages/Matches";
 import Users from "@/pages/Users";
 import LandingPage from "@/pages/LandingPage";
+import SignInPage from "@/pages/signin/SignInPage";
+import { getToken } from "@/api/client";
+
+function Protected({ children }: { children: JSX.Element }) {
+    // simple guard
+    if (!getToken()) return <Navigate to="/signin" replace />;
+    return children;
+}
 
 export default function App() {
     return (
@@ -12,7 +20,16 @@ export default function App() {
                 <Routes>
                     <Route path="/" element={<LandingPage />} />
                     <Route path="/matches" element={<Matches />} />
-                    <Route path="/users" element={<Users />} />
+                    <Route path="/signin" element={<SignInPage />} />
+                    <Route
+                        path="/users"
+                        element={
+                            <Protected>
+                                <Users />
+                            </Protected>
+                        }
+                    />
+                    <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
             </main>
             <footer className="border-t text-center py-6 text-sm text-gray-500 bg-white">
@@ -21,3 +38,4 @@ export default function App() {
         </div>
     );
 }
+

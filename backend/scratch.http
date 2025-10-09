@@ -1,20 +1,3 @@
-### 1) Create (idempotent)
-POST http://localhost:8080/api/subscriptions
-Content-Type: application/json
-
-{
-  "email": "kevgom11@gmail.com",
-  "teamId": 2
-}
-
-### 2) Create same again (should still be 200)
-POST http://localhost:8080/api/subscriptions
-Content-Type: application/json
-
-{
-  "email": "kevgom11@gmail.com",
-  "teamId": 2
-}
-
-### 3) List
-GET http://localhost:8080/api/subscriptions?email=kevgom11@gmail.com
+### 4) List my subscriptions (should be empty or your seeds)
+GET http://localhost:8080/api/subscriptions
+X-Session-Token: f4979013-b09d-4cbc-b2b3-9ffa3df7ed4a

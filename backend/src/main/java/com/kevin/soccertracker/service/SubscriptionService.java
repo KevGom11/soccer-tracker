@@ -1,24 +1,18 @@
 package com.kevin.soccertracker.service;
 
-import com.kevin.soccertracker.domain.Match;
 import com.kevin.soccertracker.domain.Subscription;
 import com.kevin.soccertracker.domain.Team;
+import com.kevin.soccertracker.domain.User;
 import com.kevin.soccertracker.dto.SubscriptionDto;
 import com.kevin.soccertracker.repo.SubscriptionRepo;
 import com.kevin.soccertracker.repo.TeamRepo;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
+import com.kevin.soccertracker.security.CurrentUserResolver;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Duration;
-import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -26,115 +20,85 @@ public class SubscriptionService {
 
     private final SubscriptionRepo subscriptionRepo;
     private final TeamRepo teamRepo;
-    private final MatchService matchService;   // already in your project
-    private final EmailService emailService;   // already in your project
 
-    @PersistenceContext
-    private EntityManager em;
-
-    /** Admin-triggered reminders by lookahead window in hours. */
     @Transactional(readOnly = true)
-    public void sendReminders(int hours) {
-        int h = (hours <= 0) ? 3 : hours;
-
-        @SuppressWarnings("unchecked")
-        List<Object[]> rows = em.createNativeQuery("""
-            SELECT u.email, s.team_id
-            FROM subscription s
-            JOIN app_user u ON u.id = s.user_id
-            WHERE s.active = TRUE
-        """).getResultList();
-
-        Map<String, List<Long>> teamIdsByEmail = rows.stream()
-                .collect(Collectors.groupingBy(
-                        r -> (String) r[0],
-                        Collectors.mapping(r -> ((Number) r[1]).longValue(), Collectors.toList())
-                ));
-
-        teamIdsByEmail.forEach((email, teamIds) -> {
-            List<Match> aggregated = new ArrayList<>();
-            for (Long teamId : teamIds) {
-                if (teamId != null) {
-                    aggregated.addAll(matchService.getUpcomingMatches(teamId, Duration.ofHours(h)));
-                }
-            }
-            if (!aggregated.isEmpty()) {
-                emailService.sendReminder(email, aggregated);
-            }
-        });
+    public List<SubscriptionDto> listForCurrentUser() {
+        User u = requireUser();
+        return subscriptionRepo.findByUser_Id(u.getId()).stream()
+                .map(this::toDto)
+                .toList();
     }
 
-    /** Ensure a User row exists (by email), returning its id. */
     @Transactional
-    public Long ensureUser(String email) {
-        String norm = email.trim().toLowerCase();
-
-        @SuppressWarnings("unchecked")
-        List<Number> existing = em.createNativeQuery("""
-            SELECT id FROM app_user WHERE email = :e
-        """).setParameter("e", norm).getResultList();
-
-        if (!existing.isEmpty()) return existing.get(0).longValue();
-
-        em.createNativeQuery("""
-            INSERT INTO app_user (email, name, created_at) VALUES (:e, :n, NOW())
-        """)
-                .setParameter("e", norm)
-                .setParameter("n", norm)
-                .executeUpdate();
-
-        Number id = (Number) em.createNativeQuery("""
-            SELECT id FROM app_user WHERE email = :e
-        """).setParameter("e", norm).getSingleResult();
-        return id.longValue();
-    }
-
-    /** Idempotent create-or-get subscription by (email, teamId). */
-    @Transactional
-    public SubscriptionDto createOrGet(String email, Long teamId) {
-        Long userId = ensureUser(email);
-
-        var existing = subscriptionRepo.findByUser_IdAndTeam_Id(userId, teamId);
-        if (existing.isPresent()) return toDto(existing.get());
+    public SubscriptionDto createOrGetForCurrentUser(Long teamId, Integer hoursBefore) {
+        User u = requireUser();
 
         Team team = teamRepo.findById(teamId)
-                .orElseThrow(() -> new NotFoundException("Team not found: " + teamId));
+                .orElseThrow(() -> new NotFoundException("Team not found: id=" + teamId));
+
+        var existing = subscriptionRepo.findByUser_IdAndTeam_Id(u.getId(), teamId);
+        if (existing.isPresent()) {
+            Subscription s = existing.get();
+            if (hoursBefore != null) s.setHoursBefore(hoursBefore);
+            s.setActive(true);
+            return toDto(subscriptionRepo.save(s));
+        }
 
         try {
             Subscription s = new Subscription();
-            s.setUser(em.getReference(com.kevin.soccertracker.domain.User.class, userId));
+            s.setUser(u);
             s.setTeam(team);
-            s.setHoursBefore(2);
+            if (hoursBefore != null) s.setHoursBefore(hoursBefore);
             s.setActive(true);
-            s.setLastSentAt(null);
-            s.setCreatedAt(Instant.now());
-            return toDto(subscriptionRepo.saveAndFlush(s));
-        } catch (DataIntegrityViolationException race) {
-            return subscriptionRepo.findByUser_IdAndTeam_Id(userId, teamId)
+            return toDto(subscriptionRepo.save(s));
+        } catch (DataIntegrityViolationException dup) {
+            return subscriptionRepo.findByUser_IdAndTeam_Id(u.getId(), teamId)
                     .map(this::toDto)
-                    .orElseThrow(() -> race);
+                    .orElseThrow(() -> dup);
         }
     }
 
-    /** List by email (safe/empty on none). */
-    @Transactional(readOnly = true)
-    public List<SubscriptionDto> listByEmail(String email) {
-        String norm = email.trim().toLowerCase();
-        return subscriptionRepo.findByUser_Email(norm)
-                .stream().map(this::toDto).collect(Collectors.toList());
+    @Transactional
+    public void deleteForCurrentUser(Long subscriptionId) {
+        User u = requireUser();
+        Subscription s = subscriptionRepo.findById(subscriptionId)
+                .orElseThrow(() -> new NotFoundException("Subscription not found: id=" + subscriptionId));
+        if (!s.getUser().getId().equals(u.getId())) {
+            throw new NotFoundException("Subscription not found for current user");
+        }
+        subscriptionRepo.delete(s);
     }
 
-    /* ===== Mapping ===== */
+    /** Legacy hook so AdminController compiles. */
+    public void sendReminders(int hours) {
+        // No-op here; your reminder/notify jobs handle scheduled/triggered sends.
+        // If you want manual trigger, wire your ReminderJob/NotifyService here.
+    }
+
+    /* ===== Helpers ===== */
+
+    private User requireUser() {
+        User u = CurrentUserResolver.get();
+        if (u == null) throw new NotSignedInException();
+        return u;
+    }
+
     private SubscriptionDto toDto(Subscription s) {
         return new SubscriptionDto(
                 s.getId(),
-                s.getEmail(),   // Subscription has getEmail() convenience
-                s.getTeamId()   // and getTeamId()
+                s.getEmail(),   // convenience getter -> user.getEmail()
+                s.getTeamId()   // convenience getter -> team.getId()
         );
     }
 
-    /* ===== Local exception ===== */
+    /* ===== Local exceptions ===== */
+
     public static class NotFoundException extends RuntimeException {
         public NotFoundException(String msg) { super(msg); }
     }
+
+    public static class NotSignedInException extends RuntimeException {
+        public NotSignedInException() { super("Not signed in"); }
+    }
 }
+
