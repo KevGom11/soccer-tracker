@@ -2,7 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { getJson } from "@/api/client";
 
-/** ---------- Types (mirrors your backend) ---------- */
+
 type Match = {
     id: number;
     competition?: string | null;
@@ -22,7 +22,7 @@ type ApiPage<T> = {
     totalPages: number;
 };
 
-/** ---------- League list (codes + labels) ---------- */
+
 const LEAGUES: { code: string; label: string; emoji?: string }[] = [
     { code: "PL",  label: "Premier League",           emoji: "🏴‍☠️" },
     { code: "PD",  label: "La Liga",                  emoji: "🇪🇸" },
@@ -61,7 +61,7 @@ export default function LandingPage() {
     );
 }
 
-/* ------------------------ HERO ------------------------ */
+
 function Hero() {
     return (
         <section className="max-w-6xl mx-auto px-4 pt-14 pb-12 text-center">
@@ -90,7 +90,7 @@ function Hero() {
     );
 }
 
-/* ------------------ LEAGUE CAROUSEL ------------------- */
+
 function LeagueCarousel() {
     const navigate = useNavigate();
     return (
@@ -120,7 +120,7 @@ function LeagueCarousel() {
     );
 }
 
-/* -------------------- STATS COUNTERS ------------------ */
+
 function useCountUp(target: number, durationMs = 1000) {
     const [value, setValue] = useState(0);
     const started = useRef(false);
@@ -177,13 +177,13 @@ function StatsRow() {
     );
 }
 
-/* ------------------ LIVE MATCH PREVIEW ---------------- */
+
 function LiveMatchPreview() {
     const [data, setData] = useState<Match[]>([]);
     const [loading, setLoading] = useState(true);
     const [err, setErr] = useState<string | null>(null);
 
-    // FIX: use /api prefix for backend
+
     const endpoint = useMemo(() => "/api/matches/upcoming?days=7&size=3", []);
 
     useEffect(() => {

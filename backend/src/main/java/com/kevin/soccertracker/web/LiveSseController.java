@@ -27,15 +27,7 @@ public class LiveSseController {
         this.matchService = matchService;
     }
 
-    /**
-     * Stream Server-Sent Events with the latest matches for a team.
-     * Params:
-     *  - teamId: required team id (e.g., 57 for Arsenal)
-     *  - days:   window for "upcoming" query (default 7)
-     *  - period: poll period in ms (default 5000)
-     *
-     * Open in the browser (or EventSource) to see updates without refreshing.
-     */
+
     @GetMapping(path = "/live-sse", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter stream(
             @RequestParam("teamId") Long teamId,
@@ -74,7 +66,7 @@ public class LiveSseController {
             }
         }, 0, Math.max(1000L, periodMillis), TimeUnit.MILLISECONDS);
 
-        // cleanup on close
+
         emitter.onCompletion(() -> {
             task.cancel(true);
             exec.shutdownNow();

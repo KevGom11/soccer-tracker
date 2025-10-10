@@ -9,13 +9,13 @@ import java.util.List;
 import java.util.Optional;
 
 public interface SubscriptionRepo extends JpaRepository<Subscription, Long> {
-    // Legacy email-based queries (kept for backward compatibility where needed)
+    // Legacy email-based queries
     List<Subscription> findByUser_Email(String email);
     Page<Subscription> findByUser_Email(String email, Pageable page);
     boolean existsByUser_Email(String email);
     Optional<Subscription> findFirstByUser_Email(String email);
 
-    // New id-based helpers for authenticated flows
+
     List<Subscription> findByUser_Id(Long userId);
     Optional<Subscription> findByUser_IdAndTeam_Id(Long userId, Long teamId);
 }

@@ -28,11 +28,11 @@ public class LiveMatchService {
     @Value("${footballdata.statusesActive:SCHEDULED,TIMED,IN_PLAY,PAUSED}")
     private String statusesActive;
 
-    /** Up to 12 comps for free plan. Codes or IDs are accepted. */
+
     @Value("${footballdata.defaultCompetitions:PL,PD,SA,BL1,FL1,CL,ELC,DED,MLI,MLS,CLI,WC}")
     private String defaultCompetitions;
 
-    /* ---------- TEAM-SCOPED (legacy compatibility) ---------- */
+
 
     public List<MatchDto> upcomingByTeam(Long teamId, int days) {
         int d = Math.max(1, days);
@@ -50,7 +50,7 @@ public class LiveMatchService {
         return parseMatches(json);
     }
 
-    /* ---------- MULTI-LEAGUE (new) ---------- */
+
 
     public List<MatchDto> upcomingByCompetitions(String competitionsCsv, int days) {
         int d = Math.max(1, days);
@@ -72,7 +72,7 @@ public class LiveMatchService {
         return parseMatches(json);
     }
 
-    /* ---------- JSON → DTO ---------- */
+
 
     private List<MatchDto> parseMatches(String json) {
         List<MatchDto> out = new ArrayList<>();

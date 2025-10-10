@@ -16,11 +16,7 @@ public class MatchController {
 
     private final LiveMatchService live;
 
-    /**
-     * Upcoming matches:
-     * - If teamId is provided => that team's upcoming.
-     * - Else => multi-league upcoming (competitions CSV or defaults).
-     */
+
     @GetMapping("/upcoming")
     public ApiPage<MatchDto> upcoming(@RequestParam(required = false) Long teamId,
                                       @RequestParam(required = false) String competitions,
@@ -35,11 +31,7 @@ public class MatchController {
         return Paging.slice(list, page, size);
     }
 
-    /**
-     * Recent matches:
-     * - If teamId is provided => that team's recent.
-     * - Else => multi-league recent (competitions CSV or defaults).
-     */
+
     @GetMapping("/recent")
     public ApiPage<MatchDto> recent(@RequestParam(required = false) Long teamId,
                                     @RequestParam(required = false) String competitions,

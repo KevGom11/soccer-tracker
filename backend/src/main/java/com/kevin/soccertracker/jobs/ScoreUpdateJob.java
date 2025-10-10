@@ -42,7 +42,7 @@ public class ScoreUpdateJob {
     @Value("${fetcher.spacingMillisBetweenCalls:6500}") // ~9 calls/min
     private long spacingMillisBetweenCalls;
 
-    // last fetch per team (to avoid re-polling too frequently)
+    // last fetch per team
     private final ConcurrentHashMap<Long, Instant> lastFetch = new ConcurrentHashMap<>();
 
     /** Cron configured in application.yml (default: every minute). */
@@ -63,7 +63,7 @@ public class ScoreUpdateJob {
 
         final Instant now = Instant.now();
 
-        // Only teams that haven't been fetched too recently
+
         final Set<Long> candidates = allTeamIds.stream()
                 .filter(teamId -> shouldFetch(teamId, now))
                 .limit(Math.max(1, maxTeamsPerRun))

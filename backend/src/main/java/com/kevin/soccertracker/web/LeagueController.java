@@ -18,7 +18,7 @@ public class LeagueController {
 
     private final TeamRepo teamRepo;
 
-    // Friendly names for common codes; fallback to code if not present
+    // Friendly names for common codes
     private static final Map<String, String> NAMES = new LinkedHashMap<>() {{
         put("PL",  "Premier League");
         put("PD",  "La Liga");

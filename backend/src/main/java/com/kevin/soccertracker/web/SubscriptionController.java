@@ -17,7 +17,7 @@ public class SubscriptionController {
 
     private final SubscriptionService subscriptionService;
 
-    /** POST /api/subscriptions — idempotent create for the current user */
+
     public static record CreateBody(@NotNull Long teamId, Integer hoursBefore) {}
 
     @PostMapping
@@ -26,13 +26,13 @@ public class SubscriptionController {
         return ResponseEntity.ok(dto); // always 200
     }
 
-    /** GET /api/subscriptions — list current user's subscriptions */
+
     @GetMapping
     public ResponseEntity<List<SubscriptionDto>> listMine() {
         return ResponseEntity.ok(subscriptionService.listForCurrentUser());
     }
 
-    /** DELETE /api/subscriptions/{id} — delete one of the current user's subscriptions */
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         subscriptionService.deleteForCurrentUser(id);

@@ -11,10 +11,7 @@ import java.util.Optional;
 
 public interface MatchRepo extends JpaRepository<Match, Long> {
 
-    /**
-     * Matches for a team (either home or away) within a datetime window (inclusive).
-     * Uses explicit JPQL with the actual mapped field name: kickoffAt.
-     */
+
     @Query("""
            select m
            from Match m
@@ -26,8 +23,5 @@ public interface MatchRepo extends JpaRepository<Match, Long> {
                                    @Param("from") ZonedDateTime from,
                                    @Param("to") ZonedDateTime to);
 
-    /**
-     * Lookup by external (football-data.org) match id.
-     */
     Optional<Match> findByExternalId(Long externalId);
 }

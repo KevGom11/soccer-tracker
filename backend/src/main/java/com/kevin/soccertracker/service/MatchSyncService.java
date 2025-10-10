@@ -21,12 +21,7 @@ public class MatchSyncService {
     private final MatchRepo matchRepo;
     private final ObjectMapper mapper = new ObjectMapper();
 
-    /**
-     * Pulls team matches for the given date window (inclusive), then updates
-     * scores/status for any matches we already have in our DB (by externalId).
-     *
-     * @return number of DB rows updated
-     */
+
     public int syncTeamWindow(long teamId, LocalDate from, LocalDate to, boolean includeActive) {
         String json = api.getTeamMatchesRaw(teamId, from, to, includeActive).block();
         if (json == null || json.isBlank()) {

@@ -64,7 +64,7 @@ public class SoccerApiClient {
                 .bodyToMono(String.class);
     }
 
-    /** NEW: multi-league matches in one call (competitions = CSV of codes or IDs). */
+    /** multi-league matches in one call (competitions = CSV of codes or IDs). */
     public Mono<String> getMatchesRaw(LocalDate from, LocalDate to,
                                       String statusesCsv,
                                       String competitionsCsv,
@@ -98,7 +98,7 @@ public class SoccerApiClient {
                 .bodyToMono(String.class);
     }
 
-    /** Example helper you already had, kept here for completeness. */
+
     public Mono<String> teamsInCompetition(String competitionCode) {
         return web.get()
                 .uri(uri -> uri.path("/competitions/{code}/teams").build(competitionCode))

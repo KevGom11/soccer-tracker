@@ -27,7 +27,7 @@ public class ReminderJob {
     @Value("${app.reminders.hoursBeforeKickoff:3}")
     private int hoursBefore;
 
-    // Run every day at 08:05 local time
+
     @Scheduled(cron = "0 5 8 * * *")
     public void daily() {
         if (!enabled) return;
@@ -39,25 +39,19 @@ public class ReminderJob {
         var now = ZonedDateTime.now();
         var cutoff = now.plusHours(hoursBefore);
 
-        // naive approach: fetch today/next-day upcoming per team, filter by window
+
         for (var s : subs) {
             var upcoming = matchService.upcomingMatches(s.getTeamId(), 2); // next 2 days
             upcoming.stream()
                     .filter(m -> m.getUtcDate() != null)
                     .filter(m -> !m.getUtcDate().isBefore(now) && !m.getUtcDate().isAfter(cutoff))
                     .forEach(m -> {
-                        // For dev safety, you can log instead of send:
+
                         System.out.println("REMINDER -> " + s.getEmail() + " : " +
                                 m.getHomeTeam().getName() + " vs " + m.getAwayTeam().getName() +
                                 " at " + m.getUtcDate());
 
-                        // Uncomment when ready to send real emails via Mailtrap:
-                        // notifyService.sendKickoffReminder(
-                        //     s.getEmail(),
-                        //     m.getHomeTeam().getName(),
-                        //     m.getAwayTeam().getName(),
-                        //     m.getUtcDate().toString()
-                        // );
+
                     });
         }
     }

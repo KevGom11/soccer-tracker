@@ -42,7 +42,7 @@ public class TeamController {
         );
     }
 
-    // Example: /api/teams/search?comp=PL&q=ars
+
     @GetMapping("/search")
     public List<TeamDto> search(
             @RequestParam(defaultValue = "PL") String comp,

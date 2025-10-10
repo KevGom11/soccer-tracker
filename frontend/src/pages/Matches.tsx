@@ -2,7 +2,7 @@
 import { getJson } from "@/api/client";
 import { useSearchParams } from "react-router-dom";
 
-/* ---------- Types (compatible with your backend) ---------- */
+
 type Match = {
   id: number;
   externalId?: number | null;
@@ -23,7 +23,7 @@ type ApiPage<T> = {
   totalPages: number;
 };
 
-/* ---------- League definitions (12 required) ---------- */
+
 const LEAGUES: { code: string; label: string; emoji?: string }[] = [
   { code: "PL",  label: "Premier League",           emoji: "🏴‍☠️" },
   { code: "PD",  label: "La Liga",                  emoji: "🇪🇸" },
@@ -40,7 +40,7 @@ const LEAGUES: { code: string; label: string; emoji?: string }[] = [
 ];
 const ALL_CODES = LEAGUES.map(l => l.code);
 
-/* ---------- Small utilities ---------- */
+
 function classNames(...xs: Array<string | false | null | undefined>) {
   return xs.filter(Boolean).join(" ");
 }
@@ -64,14 +64,12 @@ function useDebounced<T>(value: T, ms = 250) {
   return debounced;
 }
 
-/* =========================================================
-   Matches Page
-   ========================================================= */
+
 export default function Matches() {
   const [searchParams, setSearchParams] = useSearchParams();
   const urlLeague = searchParams.get("league");
 
-  // initial tab from URL if valid; otherwise "ALL"
+
   const initialTab = useMemo(() => {
     const valid = LEAGUES.some(l => l.code === urlLeague);
     return valid ? (urlLeague as string) : "ALL";
@@ -86,10 +84,10 @@ export default function Matches() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // fun UI-only “pin” state
+
   const [pinnedIds, setPinnedIds] = useState<Set<number>>(new Set());
 
-  // keep URL in sync with league tab
+
   useEffect(() => {
     const current = new URLSearchParams(searchParams);
     if (activeTab === "ALL") {
@@ -138,7 +136,7 @@ export default function Matches() {
     return () => { alive = false; };
   }, [fetchKey]);
 
-  // keep tab in sync if URL changes (user navigates)
+
   useEffect(() => {
     if (urlLeague && LEAGUES.some(l => l.code === urlLeague)) {
       setActiveTab(urlLeague);
@@ -147,7 +145,7 @@ export default function Matches() {
     }
   }, [urlLeague]);
 
-  // client-side filter by team name
+
   const filtered = useMemo(() => {
     if (!debouncedQuery.trim()) return matches;
     const q = debouncedQuery.trim().toLowerCase();
@@ -157,7 +155,7 @@ export default function Matches() {
     );
   }, [matches, debouncedQuery]);
 
-  // group by competition when ALL is selected
+
   const grouped = useMemo(() => {
     if (activeTab !== "ALL") {
       const label = LEAGUES.find(l => l.code === activeTab)?.label ?? activeTab;
@@ -181,7 +179,7 @@ export default function Matches() {
     });
   }, [filtered, activeTab]);
 
-  // pin handlers
+
   const togglePin = (id: number) => {
     setPinnedIds(prev => {
       const next = new Set(prev);

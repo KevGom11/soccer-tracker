@@ -9,10 +9,7 @@ import java.util.Map;
 @RequestMapping("/api/admin/live")
 public class AdminLiveDebugController {
 
-    /**
-     * Stub endpoint to make it clear that "live" functionality is intentionally disabled,
-     * while preserving the controller/class so routes don’t 404 unexpectedly.
-     */
+
     @GetMapping("/window")
     public ResponseEntity<Map<String, String>> windowDisabled() {
         return ResponseEntity.ok(Map.of(

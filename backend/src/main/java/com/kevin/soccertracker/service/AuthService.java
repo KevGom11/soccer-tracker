@@ -44,7 +44,7 @@ public class AuthService {
         token.setExpiresAt(OffsetDateTime.now().plusMinutes(10));
         loginTokenRepo.save(token);
 
-        // Use the 3-arg overload (implemented below in EmailService)
+
         emailService.send(email, "Your SoccerTracker login code",
                 "Your code is: " + code + " (valid for 10 minutes)");
     }
@@ -66,7 +66,7 @@ public class AuthService {
         latest.setConsumedAt(OffsetDateTime.now());
         loginTokenRepo.save(latest);
 
-        // Use a method your repo now exposes; create with your real constructor
+
         User user = userRepo.findByEmailIgnoreCase(email)
                 .orElseGet(() -> userRepo.save(new User(
                         null,              // id

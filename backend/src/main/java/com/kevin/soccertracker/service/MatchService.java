@@ -17,7 +17,7 @@ public class MatchService {
 
     private final MatchRepo matchRepo;
 
-    /** Core windowed fetch using a duration going forward from now (upcoming). */
+
     public List<Match> getUpcomingMatches(Long teamId, Duration window) {
         Objects.requireNonNull(teamId, "teamId must not be null");
         Duration w = (window == null || window.isNegative() || window.isZero())
@@ -31,19 +31,19 @@ public class MatchService {
         return matches;
     }
 
-    /** Hours lookahead (kept for SubscriptionService compatibility). */
+
     public List<Match> getUpcomingMatches(Long teamId, int hours) {
         int h = (hours <= 0) ? 24 : hours;
         return getUpcomingMatches(teamId, Duration.ofHours(h));
     }
 
-    /** Days lookahead used by controllers. */
+
     public List<Match> upcomingMatches(Long teamId, int days) {
         int d = (days <= 0) ? 1 : days;
         return getUpcomingMatches(teamId, Duration.ofDays(d));
     }
 
-    /** Past N days, newest first. */
+
     public List<Match> recentMatches(Long teamId, int days) {
         int d = (days <= 0) ? 1 : days;
         ZonedDateTime now = ZonedDateTime.now();

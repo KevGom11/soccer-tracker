@@ -69,7 +69,7 @@ public class SubscriptionService {
         subscriptionRepo.delete(s);
     }
 
-    /** Legacy hook so AdminController compiles. */
+
     public void sendReminders(int hours) {
         // No-op here; your reminder/notify jobs handle scheduled/triggered sends.
         // If you want manual trigger, wire your ReminderJob/NotifyService here.
@@ -91,7 +91,7 @@ public class SubscriptionService {
         );
     }
 
-    /* ===== Local exceptions ===== */
+
 
     public static class NotFoundException extends RuntimeException {
         public NotFoundException(String msg) { super(msg); }

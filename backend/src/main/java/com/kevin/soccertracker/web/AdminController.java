@@ -18,7 +18,7 @@ public class AdminController {
     private final SubscriptionService subscriptionService;
     private final EmailService emailService;
 
-    /** Simple admin health/info endpoint. */
+
     @GetMapping("/health")
     public Map<String, Object> health() {
         Map<String, Object> m = new HashMap<>();
@@ -29,18 +29,14 @@ public class AdminController {
         return m;
     }
 
-    /**
-     * Trigger sending consolidated reminders for all subscribed users.
-     */
+
     @PostMapping("/send-reminders")
     public ResponseEntity<String> sendReminders(@RequestParam(defaultValue = "3") int hours) {
         subscriptionService.sendReminders(hours);
         return ResponseEntity.ok("Reminders processed (hours=" + hours + ")");
     }
 
-    /**
-     * Send a simple test email to verify SMTP config.
-     */
+
     @PostMapping("/test-email")
     public ResponseEntity<String> sendTestEmail(@RequestParam("to") String to) {
         emailService.sendTest(to);

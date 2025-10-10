@@ -12,7 +12,7 @@ public class Subscription {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // in Subscription.java
+
 // who is subscribed
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "user_id", nullable = false)
@@ -67,7 +67,7 @@ public class Subscription {
         public Builder lastSentAt(Instant lastSentAt) { this.lastSentAt = lastSentAt; return this; }
         public Builder createdAt(Instant createdAt) { this.createdAt = createdAt; return this; }
 
-        // Convenience: set/create user by email
+
         public Builder email(String email) {
             if (this.user == null) this.user = new User();
             this.user.setEmail(email);

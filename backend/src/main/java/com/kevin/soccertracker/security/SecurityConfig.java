@@ -12,7 +12,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                // authorize rules
+
                 .authorizeHttpRequests(auth -> auth
                         // allow Swagger/OpenAPI
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**").permitAll()
@@ -24,7 +24,7 @@ public class SecurityConfig {
                 // disable CSRF for stateless API testing (Scratch HTTP, curl, etc.)
                 .csrf(csrf -> csrf.disable());
 
-        // If you later want basic auth, add: .httpBasic(Customizer.withDefaults());
+
         return http.build();
     }
 }

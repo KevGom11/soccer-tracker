@@ -46,7 +46,7 @@ public class Team {
         this.createdAt = createdAt;
     }
 
-    // Manual builder
+
     public static Builder builder() { return new Builder(); }
     public static final class Builder {
         private Long id;

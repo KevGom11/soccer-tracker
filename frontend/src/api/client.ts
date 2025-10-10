@@ -27,9 +27,7 @@ export async function postJson<T>(path: string, body?: any): Promise<T> { const 
 export async function putJson<T>(path: string, body?: any): Promise<T> { const r = await api.put<T>(path, body ?? {}); return r.data; }
 export async function del<T>(path: string): Promise<T> { const r = await api.delete<T>(path); return r.data; }
 
-// ======================================================
-// AUTH  (/api/auth/*)
-// ======================================================
+
 type VerifyResp = { token?: string; sessionToken?: string };
 export async function requestLoginCode(email: string): Promise<void> {
     await postJson("/api/auth/request", { email });
@@ -46,23 +44,23 @@ export async function verifyLoginCode(email: string, code: string): Promise<{ to
     return { token: tok };
 }
 
-// ======================================================
-// ME (PROFILE)  (/me, /me/profile)
-// ======================================================
+
+// ME (PROFILE)
+
 export type Me = { id: number; email: string; name: string | null; isAdmin: boolean };
 export async function getMe(): Promise<Me> { return getJson<Me>("/me"); }
 export async function updateMyName(name: string): Promise<Me> { return putJson<Me>("/me/profile", { name }); }
 
-// ======================================================
+
 // SUBSCRIPTIONS (/api/subscriptions)
-// ======================================================
+
 export type Subscription = { id: number; teamId: number; email?: string };
 export async function listMySubscriptions(): Promise<Subscription[]> { return getJson<Subscription[]>("/api/subscriptions"); }
 export async function createSubscription(teamId: number): Promise<Subscription> { return postJson<Subscription>("/api/subscriptions", { teamId }); }
 export async function deleteSubscription(id: number): Promise<void> { await del<void>(`/api/subscriptions/${id}`); }
-// ======================================================
+
 // LEAGUES / TEAMS  (served by our new LeagueController)
-// ======================================================
+
 export type League = { code: string; name: string; teamCount?: number };
 export type Team = { id: number; name: string; league?: string };
 
