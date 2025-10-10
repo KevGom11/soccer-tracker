@@ -183,7 +183,8 @@ function LiveMatchPreview() {
     const [loading, setLoading] = useState(true);
     const [err, setErr] = useState<string | null>(null);
 
-    const endpoint = useMemo(() => "/matches/upcoming?days=7&size=3", []);
+    // FIX: use /api prefix for backend
+    const endpoint = useMemo(() => "/api/matches/upcoming?days=7&size=3", []);
 
     useEffect(() => {
         let ok = true;

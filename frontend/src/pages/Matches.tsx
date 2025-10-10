@@ -113,8 +113,10 @@ export default function Matches() {
         setLoading(true);
         setError(null);
         const page = await getJson<ApiPage<Match>>(
-            `/matches/upcoming?days=${days}&size=120&competitions=${encodeURIComponent(competitionsCsv)}`
-        );
+            `/api/matches/upcoming?days=${days}&size=120&competitions=${encodeURIComponent(competitionsCsv)}`
+
+
+      );
         if (!alive) return;
         const list = (page?.data ?? []).slice().sort((a, b) =>
             new Date(a.utcDate).getTime() - new Date(b.utcDate).getTime()

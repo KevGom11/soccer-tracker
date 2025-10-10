@@ -1,82 +1,75 @@
 ﻿// src/api/client.ts
-// Minimal fetch wrapper with baseURL + session token header.
+import axios from "axios";
 
-const BASE = "/api"; // Vite proxy recommended: /api -> http://localhost:8080
+const API_BASE = (import.meta.env.VITE_API_BASE ?? "/").trim();
 
-const TOKEN_KEY = "sessionToken";
+// ---- Session token ----
+const TOKEN_KEY = "session_token";
+export function getToken(): string | null { return localStorage.getItem(TOKEN_KEY); }
+export function setToken(token: string) { if (!token) return; localStorage.setItem(TOKEN_KEY, token); window.dispatchEvent(new Event("storage")); }
+export function clearToken() { localStorage.removeItem(TOKEN_KEY); window.dispatchEvent(new Event("storage")); }
 
-export function getToken(): string | null {
-    return localStorage.getItem(TOKEN_KEY);
+// ---- Axios ----
+export const api = axios.create({
+    baseURL: API_BASE || "/",
+    withCredentials: false,
+    headers: { "Content-Type": "application/json" },
+});
+api.interceptors.request.use((config) => {
+    const tok = getToken();
+    if (tok) config.headers["X-Session-Token"] = tok;
+    return config;
+});
+
+// ---- Helpers ----
+export async function getJson<T>(path: string): Promise<T> { const r = await api.get<T>(path); return r.data; }
+export async function postJson<T>(path: string, body?: any): Promise<T> { const r = await api.post<T>(path, body ?? {}); return r.data; }
+export async function putJson<T>(path: string, body?: any): Promise<T> { const r = await api.put<T>(path, body ?? {}); return r.data; }
+export async function del<T>(path: string): Promise<T> { const r = await api.delete<T>(path); return r.data; }
+
+// ======================================================
+// AUTH  (/api/auth/*)
+// ======================================================
+type VerifyResp = { token?: string; sessionToken?: string };
+export async function requestLoginCode(email: string): Promise<void> {
+    await postJson("/api/auth/request", { email });
 }
-export function setToken(token: string) {
-    localStorage.setItem(TOKEN_KEY, token);
-}
-export function clearToken() {
-    localStorage.removeItem(TOKEN_KEY);
-}
-
-function withBase(url: string) {
-    // If caller passes absolute (http...) keep it; else prefix /api
-    if (/^https?:\/\//i.test(url)) return url;
-    return `${BASE}${url.startsWith("/") ? "" : "/"}${url}`;
-}
-
-type FetchOpts = Omit<RequestInit, "headers"> & {
-    headers?: Record<string, string>;
-};
-
-async function request<T>(method: string, url: string, opts: FetchOpts = {}): Promise<T> {
-    const headers: Record<string, string> = {
-        "Accept": "application/json",
-        ...opts.headers,
-    };
-
-    // Attach session token if present
-    const token = getToken();
-    if (token) {
-        headers["X-Session-Token"] = token;
-    }
-
-    const res = await fetch(withBase(url), { ...opts, method, headers });
-
-    // Grab token if backend returns it in header on /auth/verify
-    const headerToken = res.headers.get("X-Session-Token");
-    if (headerToken) setToken(headerToken);
-
-    if (!res.ok) {
-        let message = `${res.status} ${res.statusText}`;
-        try {
-            const data = await res.json();
-            if (data?.message) message = data.message;
-            // bubble the json error as well
-            throw Object.assign(new Error(message), { response: { status: res.status, data } });
-        } catch {
-            throw Object.assign(new Error(message), { response: { status: res.status } });
-        }
-    }
-
-    // Some endpoints may return no content
-    const text = await res.text();
-    if (!text) return undefined as unknown as T;
-
-    try {
-        return JSON.parse(text) as T;
-    } catch {
-        // Non-JSON response
-        return text as unknown as T;
-    }
+export async function verifyLoginCode(email: string, code: string): Promise<{ token: string }> {
+    const r = await api.post<VerifyResp>("/api/auth/verify", { email, code });
+    const bodyToken = r.data?.token || r.data?.sessionToken;
+    const headerToken =
+        (r.headers["x-session-token"] as string | undefined) ??
+        (r.headers["X-Session-Token"] as unknown as string | undefined);
+    const tok = bodyToken || headerToken;
+    if (!tok) throw new Error("No session token returned from /api/auth/verify");
+    setToken(tok);
+    return { token: tok };
 }
 
-export function getJson<T>(url: string, opts?: FetchOpts) {
-    return request<T>("GET", url, opts);
+// ======================================================
+// ME (PROFILE)  (/me, /me/profile)
+// ======================================================
+export type Me = { id: number; email: string; name: string | null; isAdmin: boolean };
+export async function getMe(): Promise<Me> { return getJson<Me>("/me"); }
+export async function updateMyName(name: string): Promise<Me> { return putJson<Me>("/me/profile", { name }); }
+
+// ======================================================
+// SUBSCRIPTIONS (/api/subscriptions)
+// ======================================================
+export type Subscription = { id: number; teamId: number; email?: string };
+export async function listMySubscriptions(): Promise<Subscription[]> { return getJson<Subscription[]>("/api/subscriptions"); }
+export async function createSubscription(teamId: number): Promise<Subscription> { return postJson<Subscription>("/api/subscriptions", { teamId }); }
+export async function deleteSubscription(id: number): Promise<void> { await del<void>(`/api/subscriptions/${id}`); }
+// ======================================================
+// LEAGUES / TEAMS  (served by our new LeagueController)
+// ======================================================
+export type League = { code: string; name: string; teamCount?: number };
+export type Team = { id: number; name: string; league?: string };
+
+export async function listLeagues(): Promise<League[]> {
+    return getJson<League[]>("/api/leagues");
 }
-export function postJson<T>(url: string, body?: any, opts?: FetchOpts) {
-    return request<T>("POST", url, {
-        ...opts,
-        headers: { "Content-Type": "application/json", ...(opts?.headers || {}) },
-        body: body !== undefined ? JSON.stringify(body) : undefined,
-    });
-}
-export function del<T>(url: string, opts?: FetchOpts) {
-    return request<T>("DELETE", url, opts);
+
+export async function listTeams(leagueCode: string): Promise<Team[]> {
+    return getJson<Team[]>(`/api/leagues/${leagueCode}/teams`);
 }
