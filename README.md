@@ -57,37 +57,39 @@
 
 ## 📁 Project Structure
 
+```
 soccer-tracker/
+│
 ├── backend/
-│ ├── src/
-│ │ └── main/
-│ │ ├── java/com/kevin/soccertracker/
-│ │ │ ├── controller/
-│ │ │ ├── domain/
-│ │ │ ├── dto/
-│ │ │ ├── repo/
-│ │ │ └── service/
-│ │ └── resources/
-│ │ ├── application.yml
-│ │ └── db/migration/
-│ ├── build.gradle
-│ └── settings.gradle
+│   ├── src/
+│   │   └── main/
+│   │       ├── java/
+│   │       │   └── com/kevin/soccertracker/
+│   │       │       ├── controller/
+│   │       │       ├── domain/
+│   │       │       ├── dto/
+│   │       │       ├── repo/
+│   │       │       └── service/
+│   │       └── resources/
+│   │           ├── application.yml
+│   │           └── db/migration/
+│   ├── build.gradle
+│   └── settings.gradle
 │
 ├── frontend/
-│ ├── src/
-│ │ ├── api/
-│ │ ├── components/
-│ │ ├── pages/
-│ │ ├── App.tsx
-│ │ └── main.tsx
-│ ├── package.json
-│ ├── tailwind.config.js
-│ ├── vite.config.ts
-│ └── tsconfig.json
+│   ├── src/
+│   │   ├── api/
+│   │   ├── components/
+│   │   ├── pages/
+│   │   ├── App.tsx
+│   │   └── main.tsx
+│   ├── package.json
+│   ├── tailwind.config.js
+│   ├── vite.config.ts
+│   └── tsconfig.json
 │
 ├── docker-compose.yml (optional)
 └── README.md
-
 
 ---
 
@@ -117,7 +119,7 @@ VITE_FOOTBALL_API_KEY=your-football-data-api-key
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/soccertracker
-    username: postgres
+    username: soccer
     password: yourpassword
   jpa:
     hibernate:
