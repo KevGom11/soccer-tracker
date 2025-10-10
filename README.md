@@ -56,19 +56,22 @@
 ---
 
 ## 📁 Project Structure
+
 soccer-tracker/
-│
 ├── backend/
-│ ├── src/main/java/com/kevin/soccertracker/
-│ │ ├── controller/
-│ │ ├── domain/
-│ │ ├── dto/
-│ │ ├── repo/
-│ │ └── service/
-│ ├── src/main/resources/
+│ ├── src/
+│ │ └── main/
+│ │ ├── java/com/kevin/soccertracker/
+│ │ │ ├── controller/
+│ │ │ ├── domain/
+│ │ │ ├── dto/
+│ │ │ ├── repo/
+│ │ │ └── service/
+│ │ └── resources/
 │ │ ├── application.yml
 │ │ └── db/migration/
-│ └── build.gradle
+│ ├── build.gradle
+│ └── settings.gradle
 │
 ├── frontend/
 │ ├── src/
@@ -77,12 +80,15 @@ soccer-tracker/
 │ │ ├── pages/
 │ │ ├── App.tsx
 │ │ └── main.tsx
+│ ├── package.json
 │ ├── tailwind.config.js
 │ ├── vite.config.ts
-│ └── package.json
+│ └── tsconfig.json
 │
-├── README.md
-└── docker-compose.yml (optional)
+├── docker-compose.yml (optional)
+└── README.md
+
+
 ---
 
 ## 🚀 Getting Started
@@ -104,8 +110,7 @@ Create the following files based on the examples provided:
 VITE_API_BASE_URL=http://localhost:8080
 VITE_FOOTBALL_API_KEY=your-football-data-api-key
 
-yaml
-Copy code
+
 
 **Backend – `application.yml`**
 ```
@@ -125,7 +130,6 @@ football:
 🏃 Running the App
 Backend
 bash
-Copy code
 cd backend
 ./gradlew bootRun
 Backend runs on:
@@ -133,7 +137,6 @@ Backend runs on:
 
 Frontend
 bash
-Copy code
 cd frontend
 npm install
 npm run dev
